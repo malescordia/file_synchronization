@@ -9,13 +9,6 @@
 #define MAX_PATH_LENGTH 256
 #define LOG_FILE "logs.txt"
 
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define PURPLE "\033[35m"
-#define BLUE "\033[36m"
-#define R "\033[0m" /* reset colors */
-
 void	log_to_file(const char *log_message)
 {
 	FILE	*file;
@@ -23,7 +16,7 @@ void	log_to_file(const char *log_message)
 	file = fopen(LOG_FILE, "a");
 	if (file == NULL)
 	{
-		printf(RED "Error opening log file.\n" R);
+		printf("Error opening log file.\n");
 		return ;
 	}
 	fprintf(file, "%s\n", log_message);
@@ -40,40 +33,35 @@ void	sync_folders(const char *src, const char *dest)
 
 	if ((dir = opendir(src)) == NULL)
 	{
-		printf(RED "Error opening source folder.\n" R);
+		printf("Error opening source folder.\n");
 		return ;
 	}
-	/* Iterate over files and directories in the source folder */
 	while ((entry = readdir(dir)) != NULL)
 	{
 		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-			continue ; /* Skip current and parent directories */
+			continue ;
 		snprintf(src_path, sizeof(src_path), "%s/%s", src, entry->d_name);
 		snprintf(dest_path, sizeof(dest_path), "%s/%s", dest, entry->d_name);
 		if (stat(src_path, &stat_buf) == -1)
 		{
-			printf(RED "Error getting file stats for %s.\n" R, src_path);
+			printf("Error getting file stats for %s.\n", src_path);
 			continue ;
 		}
-		/* Check if entry is a file or directory */
 		if (S_ISDIR(stat_buf.st_mode))
 			sync_folders(src_path, dest_path);
 		else
 		{
-			/* File found, check if it exists in destination folder */
 			if (access(dest_path, F_OK) != -1)
 			{
-				/* File exists in destination, remove it before copying */
 				remove(dest_path);
-				printf(YELLOW "File %s removed from destination.\n" R, entry->d_name);
+				printf("File %s removed from destination.\n", entry->d_name);
 				log_to_file(entry->d_name);
 			}
-			/* Copy file from source to destination */
 			if (link(src_path, dest_path) == -1)
-				printf(RED "Error copying file %s to destination.\n" R, entry->d_name);
+				printf("Error copying file %s to destination.\n", entry->d_name);
 			else
 			{
-				printf(GREEN "File %s copied to destination.\n" R, entry->d_name);
+				printf("File %s copied to destination.\n", entry->d_name);
 				log_to_file(entry->d_name);
 			}
 		}
@@ -89,13 +77,13 @@ int	main(int ac, char **av)
 
 	if (ac != 4)
 	{
-		printf(PURPLE "Usage: %s <source_folder> <destination_folder> <sync_interval>\n" R, av[0]);
+		printf("Usage: %s <source_folder> <destination_folder> <sync_interval>\n", av[0]);
 		return (1);
 	}
 	sync_interval = atoi(av[3]);
 	if (access(src, F_OK) == -1 || access(dest, F_OK) == -1)
 	{
-		printf(RED "Source or destination folder does not exist.\n" R);
+		printf("Source or destination folder does not exist.\n");
 		return (1);
 	}
 	while (42)
